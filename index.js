@@ -9,7 +9,7 @@ app.use(express.json());
 
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.xjkn1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
-console.log(uri);
+
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -35,6 +35,15 @@ async function run() {
       const user = req.body;
       const result = await orderCollection.insertOne(user);
       res.send(result);
+    });
+
+    // order details get
+    app.get("/order", async (req, res) => {
+      const email = req.query.email;
+      const query = { email };
+      const cursor = orderCollection.find(query);
+      const event = await cursor.toArray();
+      res.send(event);
     });
   } finally {
   }
