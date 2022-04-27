@@ -46,6 +46,14 @@ async function run() {
       res.send(event);
     });
 
+    // order details get
+    app.get("/orders", async (req, res) => {
+      const query = {};
+      const cursor = orderCollection.find(query);
+      const event = await cursor.toArray();
+      res.send(event);
+    });
+
     // delete api
     app.delete("/order/:id", async (req, res) => {
       const id = req.params.id;
