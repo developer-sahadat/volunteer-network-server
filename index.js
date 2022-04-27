@@ -48,7 +48,7 @@ async function run() {
     // order details get
     app.get("/order", async (req, res) => {
       // const decoded = verifyToken(req.headers.authorization);
-      const email = req.query.email;
+      const email = req.query;
       const query = { email };
       const cursor = orderCollection.find(query);
       const event = await cursor.toArray();
