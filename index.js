@@ -1,4 +1,5 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 require("dotenv").config();
@@ -30,6 +31,13 @@ async function run() {
       res.send(event);
     });
 
+    // event add
+    app.post("/event", async (req, res) => {
+      const user = req.body;
+      const result = await collection.insertOne(user);
+      res.send(result);
+    });
+
     // order details
     app.post("/order", async (req, res) => {
       const user = req.body;
@@ -39,13 +47,19 @@ async function run() {
 
     // order details get
     app.get("/order", async (req, res) => {
+      const decoded = verifyToken(req.headers.authorization);
       const email = req.query.email;
       const query = { email };
       const cursor = orderCollection.find(query);
-      const event = await cursor.toArray();
-      res.send(event);
+      if (decoded === email) {
+        const event = await cursor.toArray();
+        res.send(event);
+      } else {
+        res.send([{ success: "unAuthorization" }]);
+      }
     });
 
+    // admin api
     // order details get
     app.get("/orders", async (req, res) => {
       const query = {};
@@ -60,6 +74,13 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const result = await orderCollection.deleteOne(query);
       res.send(result);
+    });
+
+    // json web token
+    app.post("/login", (req, res) => {
+      const email = req.body.email;
+      const token = jwt.sign(email, process.env.TOKEN_KEY);
+      res.send({ token });
     });
   } finally {
   }
@@ -77,3 +98,18 @@ app.listen(port, () => {
 
 //volunteer-network
 //ws920q7Gr3CDGo1V
+
+function verifyToken(token) {
+  // verify a token symmetric
+  let email;
+  jwt.verify(token, process.env.TOKEN_KEY, function (err, decoded) {
+    if (err) {
+      email = "not valid email";
+    }
+    if (decoded) {
+      email = decoded;
+    }
+  });
+
+  return email;
+}
