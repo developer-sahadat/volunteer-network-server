@@ -47,18 +47,17 @@ async function run() {
 
     // order details get
     app.get("/order", async (req, res) => {
-      // const decoded = verifyToken(req.headers.authorization);
-      const email = req.query;
-      const query = { email };
-      const cursor = orderCollection.find(query);
-      const event = await cursor.toArray();
-      res.send(event);
+      const decoded = verifyToken(req.headers.authorization);
+      const email = req.query.email;
 
-      // if (decoded === email) {
-
-      // } else {
-      //   res.send([{ success: "unAuthorization" }]);
-      // }
+      if (decoded === email) {
+        const query = { email };
+        const cursor = orderCollection.find(query);
+        const event = await cursor.toArray();
+        res.send(event);
+      } else {
+        res.send([{ success: "unAuthorization" }]);
+      }
     });
 
     // admin api
@@ -101,17 +100,17 @@ app.listen(port, () => {
 //volunteer-network
 //ws920q7Gr3CDGo1V
 
-// function verifyToken(token) {
-//   // verify a token symmetric
-//   let email;
-//   jwt.verify(token, process.env.TOKEN_KEY, function (err, decoded) {
-//     if (err) {
-//       email = "not valid email";
-//     }
-//     if (decoded) {
-//       email = decoded;
-//     }
-//   });
+function verifyToken(token) {
+  // verify a token symmetric
+  let email;
+  jwt.verify(token, process.env.TOKEN_KEY, function (err, decoded) {
+    if (decoded) {
+      email = decoded;
+    }
+    if (err) {
+      email = "not valid email";
+    }
+  });
 
-//   return email;
-// }
+  return email;
+}
